@@ -29,14 +29,14 @@ jobs:
         run: ./gradlew ktlintCheck detekt testDebugUnitTest assembleDebug
 
       - name: Upload debug APK
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: dockclock-debug
           path: app/build/outputs/apk/debug/*.apk
 
       - name: Upload reports on failure
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: reports
           path: app/build/reports/
