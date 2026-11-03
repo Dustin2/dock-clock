@@ -12,4 +12,7 @@ abstract class NotificationsModule {
     abstract fun bindNotificationRepository(
         impl: InMemoryNotificationRepository
     ): NotificationRepository
+
+    @Binds
+    abstract fun bindAppInfoProvider(impl: PackageManagerAppInfoProvider): AppInfoProvider
 }
