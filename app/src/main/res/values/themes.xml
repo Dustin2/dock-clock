@@ -1,0 +1,4 @@
+<resources>
+    <!-- Window theme only; all in-app styling comes from the Compose theme. -->
+    <style name="Theme.DockClock" parent="android:Theme.Material.NoActionBar" />
+</resources>
