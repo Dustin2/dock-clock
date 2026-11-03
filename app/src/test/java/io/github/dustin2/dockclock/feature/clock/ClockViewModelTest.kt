@@ -121,6 +121,25 @@ class ClockViewModelTest {
     }
 
     @Test
+    fun `leaves out notifications from hidden apps`() = runTest(dispatcher) {
+        notificationRepository.replaceAll(
+            listOf(
+                notification(key = "a"),
+                notification(key = "b", packageName = "com.example.mail")
+            )
+        )
+        settingsRepository.setAppHidden("com.example.chat", hidden = true)
+
+        viewModel().uiState.test {
+            skipItems(1)
+            assertEquals(listOf("b"), awaitItem().notifications.map { it.key })
+
+            settingsRepository.setAppHidden("com.example.chat", hidden = false)
+            assertEquals(listOf("a", "b"), awaitItem().notifications.map { it.key })
+        }
+    }
+
+    @Test
     fun `initial state has no notifications until settings load`() {
         notificationRepository.replaceAll(listOf(notification(key = "a")))
 
@@ -141,8 +160,8 @@ class ClockViewModelTest {
         }
     }
 
-    private fun notification(key: String) =
-        ClockNotification(key, "com.example.chat", "Ana", "Hi", postedAtMillis = 0)
+    private fun notification(key: String, packageName: String = "com.example.chat") =
+        ClockNotification(key, packageName, "Ana", "Hi", postedAtMillis = 0)
 
     private fun TestScope.advanceTimeByAndRun(millis: Long) {
         advanceTimeBy(millis)

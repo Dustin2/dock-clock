@@ -5,6 +5,7 @@ import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -35,5 +36,16 @@ class DataStoreSettingsRepositoryTest {
 
         repository.setHideNotificationContent(false)
         assertFalse(repository.settings.first().hideNotificationContent)
+    }
+
+    @Test
+    fun `saves hidden apps`() = runTest {
+        val repository = repository()
+
+        repository.setAppHidden("com.example.chat", hidden = true)
+        repository.setAppHidden("com.example.mail", hidden = true)
+        repository.setAppHidden("com.example.chat", hidden = false)
+
+        assertEquals(setOf("com.example.mail"), repository.settings.first().hiddenApps)
     }
 }

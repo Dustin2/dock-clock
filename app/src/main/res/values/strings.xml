@@ -7,4 +7,7 @@
     <string name="notification_access_granted">Notification access is on.</string>
     <string name="settings_hide_content_title">Hide notification content</string>
     <string name="settings_hide_content_description">Show only the app name and icon on the clock.</string>
+    <string name="choose_apps_title">Choose apps</string>
+    <string name="choose_apps_description">Pick which apps can show notifications on the clock.</string>
+    <string name="navigate_back">Back</string>
 </resources>

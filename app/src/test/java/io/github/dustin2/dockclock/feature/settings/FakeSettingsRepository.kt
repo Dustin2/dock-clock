@@ -11,4 +11,17 @@ class FakeSettingsRepository(initial: UserSettings = UserSettings()) : SettingsR
     override suspend fun setHideNotificationContent(hide: Boolean) {
         state.value = state.value.copy(hideNotificationContent = hide)
     }
+
+    override suspend fun setAppHidden(packageName: String, hidden: Boolean) {
+        val current = state.value.hiddenApps
+        state.value =
+            state.value.copy(
+                hiddenApps = if (hidden) {
+                    current + packageName
+                } else {
+                    current -
+                        packageName
+                }
+            )
+    }
 }
