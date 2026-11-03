@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -44,7 +45,9 @@ fun ClockContent(uiState: ClockUiState, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .safeDrawingPadding(),
+            .safeDrawingPadding()
+            // Applied after the background so only the content moves, never the black fill.
+            .offset(x = uiState.burnInShift.xDp.dp, y = uiState.burnInShift.yDp.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         ClockFace(
