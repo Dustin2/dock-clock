@@ -23,6 +23,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import io.github.dustin2.dockclock.feature.appselection.AppSelectionScreen
 import io.github.dustin2.dockclock.feature.permissions.NotificationAccessSection
+import io.github.dustin2.dockclock.feature.screensaver.ScreenSaverSection
 import io.github.dustin2.dockclock.feature.settings.SettingsSection
 import kotlinx.serialization.Serializable
 
@@ -76,6 +77,7 @@ private fun HomeScreen(onStartClock: () -> Unit, onChooseApps: () -> Unit) {
         ) {
             NotificationAccessSection()
             SettingsSection(onChooseApps = onChooseApps)
+            ScreenSaverSection()
             Button(onClick = onStartClock) {
                 Text(stringResource(R.string.start_clock))
             }
