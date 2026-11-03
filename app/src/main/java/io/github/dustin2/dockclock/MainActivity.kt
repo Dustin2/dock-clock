@@ -1,12 +1,13 @@
 package io.github.dustin2.dockclock
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.dustin2.dockclock.core.designsystem.DockClockTheme
+import io.github.dustin2.dockclock.feature.clock.ClockActivity
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -24,26 +26,27 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DockClockTheme {
-                PlaceholderScreen()
+                HomeScreen(onStartClock = {
+                    startActivity(Intent(this, ClockActivity::class.java))
+                })
             }
         }
     }
 }
 
 @Composable
-private fun PlaceholderScreen() {
+private fun HomeScreen(onStartClock: () -> Unit) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineMedium
-            )
+            Button(onClick = onStartClock) {
+                Text(stringResource(R.string.start_clock))
+            }
         }
     }
 }
 
 @Preview
 @Composable
-private fun PlaceholderScreenPreview() {
-    DockClockTheme { PlaceholderScreen() }
+private fun HomeScreenPreview() {
+    DockClockTheme { HomeScreen(onStartClock = {}) }
 }
