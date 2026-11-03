@@ -1,0 +1,27 @@
+package io.github.dustin2.dockclock.feature.settings
+
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+
+class FakeSettingsRepository(initial: UserSettings = UserSettings()) : SettingsRepository {
+    private val state = MutableStateFlow(initial)
+
+    override val settings: StateFlow<UserSettings> = state
+
+    override suspend fun setHideNotificationContent(hide: Boolean) {
+        state.value = state.value.copy(hideNotificationContent = hide)
+    }
+
+    override suspend fun setAppHidden(packageName: String, hidden: Boolean) {
+        val current = state.value.hiddenApps
+        state.value =
+            state.value.copy(
+                hiddenApps = if (hidden) {
+                    current + packageName
+                } else {
+                    current -
+                        packageName
+                }
+            )
+    }
+}
