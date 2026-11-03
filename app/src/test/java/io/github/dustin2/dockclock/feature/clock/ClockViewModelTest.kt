@@ -1,6 +1,10 @@
 package io.github.dustin2.dockclock.feature.clock
 
 import app.cash.turbine.test
+import io.github.dustin2.dockclock.feature.notifications.AppInfo
+import io.github.dustin2.dockclock.feature.notifications.AppInfoProvider
+import io.github.dustin2.dockclock.feature.notifications.ClockNotification
+import io.github.dustin2.dockclock.feature.notifications.InMemoryNotificationRepository
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
@@ -34,6 +38,10 @@ class ClockViewModelTest {
     }
 
     private val settings = FakeDeviceTimeSettings()
+    private val notificationRepository = InMemoryNotificationRepository()
+
+    private fun viewModel() =
+        ClockViewModel(clock, settings, notificationRepository, FakeAppInfoProvider())
 
     @Before
     fun setUp() = Dispatchers.setMain(dispatcher)
@@ -43,7 +51,7 @@ class ClockViewModelTest {
 
     @Test
     fun `initial state shows current time and date`() {
-        val state = ClockViewModel(clock, settings).uiState.value
+        val state = viewModel().uiState.value
 
         assertEquals(ClockUiState(time = "14:05", date = "Tuesday, November 3, 2026"), state)
     }
@@ -52,19 +60,19 @@ class ClockViewModelTest {
     fun `uses 12 hour format when the device does`() {
         settings.is24Hour = false
 
-        assertEquals("2:05 PM", ClockViewModel(clock, settings).uiState.value.time)
+        assertEquals("2:05 PM", viewModel().uiState.value.time)
     }
 
     @Test
     fun `uses the device time zone`() {
         settings.zoneId = ZoneId.of("America/Mexico_City")
 
-        assertEquals("08:05", ClockViewModel(clock, settings).uiState.value.time)
+        assertEquals("08:05", viewModel().uiState.value.time)
     }
 
     @Test
     fun `updates exactly at the next minute boundary`() = runTest(dispatcher) {
-        ClockViewModel(clock, settings).uiState.test {
+        viewModel().uiState.test {
             assertEquals("14:05", awaitItem().time)
 
             advanceTimeByAndRun(29_999)
@@ -75,10 +83,44 @@ class ClockViewModelTest {
         }
     }
 
+    @Test
+    fun `shows active notifications with app info`() {
+        notificationRepository.replaceAll(listOf(notification(key = "a")))
+
+        val notifications = viewModel().uiState.value.notifications
+
+        assertEquals(
+            listOf(NotificationUiModel("a", "Label of com.example.chat", null, "Ana", "Hi")),
+            notifications
+        )
+    }
+
+    @Test
+    fun `follows posted and removed notifications`() = runTest(dispatcher) {
+        viewModel().uiState.test {
+            assertEquals(emptyList<NotificationUiModel>(), awaitItem().notifications)
+
+            notificationRepository.replaceAll(listOf(notification(key = "a")))
+            assertEquals(listOf("a"), awaitItem().notifications.map { it.key })
+
+            // Same as losing notification access: the listener clears the repository.
+            notificationRepository.clear()
+            assertEquals(emptyList<NotificationUiModel>(), awaitItem().notifications)
+        }
+    }
+
+    private fun notification(key: String) =
+        ClockNotification(key, "com.example.chat", "Ana", "Hi", postedAtMillis = 0)
+
     private fun TestScope.advanceTimeByAndRun(millis: Long) {
         advanceTimeBy(millis)
         testScheduler.runCurrent()
     }
+}
+
+private class FakeAppInfoProvider : AppInfoProvider {
+    override fun appInfo(packageName: String) =
+        AppInfo(label = "Label of $packageName", icon = null)
 }
 
 private class FakeDeviceTimeSettings : DeviceTimeSettings {

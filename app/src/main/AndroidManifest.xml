@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
+        Package visibility (Android 11+) hides other apps by default, so their name and icon
+        could not be loaded for their notifications. Apps that post user-facing notifications
+        are launchable, so querying launcher activities is enough and avoids QUERY_ALL_PACKAGES.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
     <application
         android:name=".DockClockApplication"
         android:allowBackup="false"
