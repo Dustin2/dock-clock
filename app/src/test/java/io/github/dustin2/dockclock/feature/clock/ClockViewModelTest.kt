@@ -5,6 +5,7 @@ import io.github.dustin2.dockclock.feature.notifications.AppInfo
 import io.github.dustin2.dockclock.feature.notifications.AppInfoProvider
 import io.github.dustin2.dockclock.feature.notifications.ClockNotification
 import io.github.dustin2.dockclock.feature.notifications.InMemoryNotificationRepository
+import io.github.dustin2.dockclock.feature.settings.FakeSettingsRepository
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
@@ -39,9 +40,15 @@ class ClockViewModelTest {
 
     private val settings = FakeDeviceTimeSettings()
     private val notificationRepository = InMemoryNotificationRepository()
+    private val settingsRepository = FakeSettingsRepository()
 
-    private fun viewModel() =
-        ClockViewModel(clock, settings, notificationRepository, FakeAppInfoProvider())
+    private fun viewModel() = ClockViewModel(
+        clock,
+        settings,
+        notificationRepository,
+        settingsRepository,
+        FakeAppInfoProvider()
+    )
 
     @Before
     fun setUp() = Dispatchers.setMain(dispatcher)
@@ -84,15 +91,40 @@ class ClockViewModelTest {
     }
 
     @Test
-    fun `shows active notifications with app info`() {
+    fun `shows active notifications with app info`() = runTest(dispatcher) {
         notificationRepository.replaceAll(listOf(notification(key = "a")))
 
-        val notifications = viewModel().uiState.value.notifications
+        viewModel().uiState.test {
+            skipItems(1)
+            assertEquals(
+                listOf(NotificationUiModel("a", "Label of com.example.chat", null, "Ana", "Hi")),
+                awaitItem().notifications
+            )
+        }
+    }
 
-        assertEquals(
-            listOf(NotificationUiModel("a", "Label of com.example.chat", null, "Ana", "Hi")),
-            notifications
-        )
+    @Test
+    fun `hides title and text when content is hidden`() = runTest(dispatcher) {
+        notificationRepository.replaceAll(listOf(notification(key = "a")))
+        settingsRepository.setHideNotificationContent(true)
+
+        viewModel().uiState.test {
+            skipItems(1)
+            assertEquals(
+                listOf(NotificationUiModel("a", "Label of com.example.chat", null, null, null)),
+                awaitItem().notifications
+            )
+
+            settingsRepository.setHideNotificationContent(false)
+            assertEquals("Ana", awaitItem().notifications.single().title)
+        }
+    }
+
+    @Test
+    fun `initial state has no notifications until settings load`() {
+        notificationRepository.replaceAll(listOf(notification(key = "a")))
+
+        assertEquals(emptyList<NotificationUiModel>(), viewModel().uiState.value.notifications)
     }
 
     @Test

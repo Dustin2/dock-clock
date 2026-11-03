@@ -7,6 +7,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.dustin2.dockclock.feature.notifications.AppInfoProvider
 import io.github.dustin2.dockclock.feature.notifications.ClockNotification
 import io.github.dustin2.dockclock.feature.notifications.NotificationRepository
+import io.github.dustin2.dockclock.feature.settings.SettingsRepository
+import io.github.dustin2.dockclock.feature.settings.UserSettings
 import java.time.Clock
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -39,15 +41,22 @@ class ClockViewModel @Inject constructor(
     private val clock: Clock,
     private val settings: DeviceTimeSettings,
     notificationRepository: NotificationRepository,
+    settingsRepository: SettingsRepository,
     private val appInfoProvider: AppInfoProvider
 ) : ViewModel() {
     val uiState: StateFlow<ClockUiState> =
-        combine(minuteTicks(), notificationRepository.notifications, ::toUiState)
+        combine(
+            minuteTicks(),
+            notificationRepository.notifications,
+            settingsRepository.settings,
+            ::toUiState
+        )
             // Stops ticking shortly after the screen is no longer visible.
             .stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-                toUiState(clock.instant(), notificationRepository.notifications.value)
+                // No notifications until settings load, so hidden content never flashes on screen.
+                toUiState(clock.instant(), emptyList(), UserSettings())
             )
 
     /** Emits now, then right after each minute boundary, so the display never lags behind. */
@@ -61,7 +70,11 @@ class ClockViewModel @Inject constructor(
 
     // shortcut: app info is loaded on the main thread the first time a package shows up;
     // move it to a background dispatcher if icon loading ever causes jank.
-    private fun toUiState(instant: Instant, notifications: List<ClockNotification>): ClockUiState {
+    private fun toUiState(
+        instant: Instant,
+        notifications: List<ClockNotification>,
+        userSettings: UserSettings
+    ): ClockUiState {
         val locale = settings.locale()
         val dateTime = instant.atZone(settings.zone())
         val timePattern = if (settings.is24HourFormat()) "HH:mm" else "h:mm a"
@@ -70,18 +83,23 @@ class ClockViewModel @Inject constructor(
             date = dateTime.format(
                 DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale)
             ),
-            notifications = notifications.map(::toUiModel)
+            notifications = notifications.map {
+                toUiModel(it, userSettings.hideNotificationContent)
+            }
         )
     }
 
-    private fun toUiModel(notification: ClockNotification): NotificationUiModel {
+    private fun toUiModel(
+        notification: ClockNotification,
+        hideContent: Boolean
+    ): NotificationUiModel {
         val appInfo = appInfoProvider.appInfo(notification.packageName)
         return NotificationUiModel(
             key = notification.key,
             appName = appInfo.label,
             appIcon = appInfo.icon,
-            title = notification.title,
-            text = notification.text
+            title = notification.title.takeUnless { hideContent },
+            text = notification.text.takeUnless { hideContent }
         )
     }
 
