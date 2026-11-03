@@ -3,6 +3,7 @@ package io.github.dustin2.dockclock.feature.clock
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,27 +42,37 @@ fun ClockScreen(viewModel: ClockViewModel = hiltViewModel()) {
 
 @Composable
 fun ClockContent(uiState: ClockUiState, modifier: Modifier = Modifier) {
-    Row(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .safeDrawingPadding()
             // Applied after the background so only the content moves, never the black fill.
-            .offset(x = uiState.burnInShift.xDp.dp, y = uiState.burnInShift.yDp.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .offset(x = uiState.burnInShift.xDp.dp, y = uiState.burnInShift.yDp.dp)
     ) {
-        ClockFace(
-            time = uiState.time,
-            date = uiState.date,
-            modifier = Modifier.weight(CLOCK_WEIGHT)
-        )
-        if (uiState.notifications.isNotEmpty()) {
-            NotificationList(
-                notifications = uiState.notifications,
-                modifier = Modifier
-                    .weight(NOTIFICATIONS_WEIGHT)
-                    .fillMaxHeight()
-            )
+        // The screen saver cannot lock orientation, so portrait stacks instead of side by side.
+        if (maxWidth > maxHeight) {
+            Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+                ClockFace(uiState.time, uiState.date, Modifier.weight(CLOCK_WEIGHT))
+                if (uiState.notifications.isNotEmpty()) {
+                    NotificationList(
+                        notifications = uiState.notifications,
+                        modifier = Modifier
+                            .weight(NOTIFICATIONS_WEIGHT)
+                            .fillMaxHeight()
+                    )
+                }
+            }
+        } else {
+            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
+                ClockFace(uiState.time, uiState.date, Modifier.fillMaxWidth())
+                if (uiState.notifications.isNotEmpty()) {
+                    NotificationList(
+                        notifications = uiState.notifications,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
     }
 }
@@ -172,6 +183,14 @@ private fun ClockContentPreview() {
 @Preview(widthDp = 800, heightDp = 360)
 @Composable
 private fun ClockContentWithNotificationsPreview() {
+    DockClockTheme {
+        ClockContent(ClockUiState("14:05", "Tuesday, November 3, 2026", previewNotifications))
+    }
+}
+
+@Preview(widthDp = 360, heightDp = 800)
+@Composable
+private fun ClockContentPortraitPreview() {
     DockClockTheme {
         ClockContent(ClockUiState("14:05", "Tuesday, November 3, 2026", previewNotifications))
     }

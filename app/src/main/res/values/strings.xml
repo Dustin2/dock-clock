@@ -10,4 +10,7 @@
     <string name="choose_apps_title">Choose apps</string>
     <string name="choose_apps_description">Pick which apps can show notifications on the clock.</string>
     <string name="navigate_back">Back</string>
+    <string name="screen_saver_title">Screen saver</string>
+    <string name="screen_saver_description">Show the clock automatically while the phone is charging. In Settings, choose DockClock as the screen saver and set it to start while charging. It appears when the screen would normally turn off.</string>
+    <string name="screen_saver_open_settings">Open screen saver settings</string>
 </resources>
