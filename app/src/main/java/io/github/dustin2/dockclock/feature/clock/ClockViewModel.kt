@@ -26,7 +26,8 @@ data class ClockUiState(
     val time: String,
     val date: String,
     val notifications: List<NotificationUiModel> = emptyList(),
-    val burnInShift: BurnInShift = BurnInShift(0, 0)
+    val burnInShift: BurnInShift = BurnInShift(0, 0),
+    val isNight: Boolean = false
 )
 
 data class NotificationUiModel(
@@ -87,7 +88,8 @@ class ClockViewModel @Inject constructor(
             notifications = notifications
                 .filter { it.packageName !in userSettings.hiddenApps }
                 .map { toUiModel(it, userSettings.hideNotificationContent) },
-            burnInShift = burnInShift(minute = instant.epochSecond / SECONDS_PER_MINUTE)
+            burnInShift = burnInShift(minute = instant.epochSecond / SECONDS_PER_MINUTE),
+            isNight = userSettings.nightMode && isNightTime(dateTime.toLocalTime())
         )
     }
 

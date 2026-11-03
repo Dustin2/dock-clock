@@ -44,4 +44,15 @@ class SettingsViewModelTest {
 
         assertTrue(repository.settings.value.hideNotificationContent)
     }
+
+    @Test
+    fun `toggling night mode saves the new value`() = runTest(dispatcher) {
+        val repository = FakeSettingsRepository()
+        val viewModel = SettingsViewModel(repository)
+
+        viewModel.onNightModeChange(false)
+        testScheduler.runCurrent()
+
+        assertFalse(repository.settings.value.nightMode)
+    }
 }

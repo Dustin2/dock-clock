@@ -24,6 +24,10 @@ class SettingsViewModel @Inject constructor(private val settingsRepository: Sett
         viewModelScope.launch { settingsRepository.setHideNotificationContent(hide) }
     }
 
+    fun onNightModeChange(enabled: Boolean) {
+        viewModelScope.launch { settingsRepository.setNightMode(enabled) }
+    }
+
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L
     }

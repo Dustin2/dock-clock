@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +38,7 @@ import io.github.dustin2.dockclock.core.designsystem.DockClockTheme
 @Composable
 fun ClockScreen(viewModel: ClockViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    NightBrightnessEffect(uiState.isNight)
     ClockContent(uiState)
 }
 
@@ -49,6 +51,7 @@ fun ClockContent(uiState: ClockUiState, modifier: Modifier = Modifier) {
             .safeDrawingPadding()
             // Applied after the background so only the content moves, never the black fill.
             .offset(x = uiState.burnInShift.xDp.dp, y = uiState.burnInShift.yDp.dp)
+            .alpha(if (uiState.isNight) NIGHT_CONTENT_ALPHA else 1f)
     ) {
         // The screen saver cannot lock orientation, so portrait stacks instead of side by side.
         if (maxWidth > maxHeight) {
@@ -165,6 +168,7 @@ private val MAX_TIME_FONT_SIZE = 240.sp
 private const val TIME_WIDTH_FRACTION = 0.85f
 private const val CLOCK_WEIGHT = 3f
 private const val NOTIFICATIONS_WEIGHT = 2f
+private const val NIGHT_CONTENT_ALPHA = 0.4f
 
 private val previewNotifications =
     listOf(
@@ -185,6 +189,16 @@ private fun ClockContentPreview() {
 private fun ClockContentWithNotificationsPreview() {
     DockClockTheme {
         ClockContent(ClockUiState("14:05", "Tuesday, November 3, 2026", previewNotifications))
+    }
+}
+
+@Preview(widthDp = 800, heightDp = 360)
+@Composable
+private fun ClockContentNightPreview() {
+    DockClockTheme {
+        ClockContent(
+            ClockUiState("23:05", "Tuesday, November 3, 2026", previewNotifications, isNight = true)
+        )
     }
 }
 

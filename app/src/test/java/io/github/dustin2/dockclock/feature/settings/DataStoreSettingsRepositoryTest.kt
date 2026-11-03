@@ -39,6 +39,15 @@ class DataStoreSettingsRepositoryTest {
     }
 
     @Test
+    fun `saves night mode, on by default`() = runTest {
+        val repository = repository()
+        assertTrue(repository.settings.first().nightMode)
+
+        repository.setNightMode(false)
+        assertFalse(repository.settings.first().nightMode)
+    }
+
+    @Test
     fun `saves hidden apps`() = runTest {
         val repository = repository()
 
