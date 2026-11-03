@@ -21,7 +21,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -169,6 +171,26 @@ class ClockViewModelTest {
             // Same as losing notification access: the listener clears the repository.
             notificationRepository.clear()
             assertEquals(emptyList<NotificationUiModel>(), awaitItem().notifications)
+        }
+    }
+
+    @Test
+    fun `is night between 22 and 7 in the device time zone`() {
+        assertFalse(viewModel().uiState.value.isNight)
+
+        // 14:05 UTC is 23:05 in Tokyo.
+        settings.zoneId = ZoneId.of("Asia/Tokyo")
+        assertTrue(viewModel().uiState.value.isNight)
+    }
+
+    @Test
+    fun `is never night when night mode is off`() = runTest(dispatcher) {
+        settings.zoneId = ZoneId.of("Asia/Tokyo")
+        settingsRepository.setNightMode(false)
+
+        viewModel().uiState.test {
+            skipItems(1)
+            assertFalse(awaitItem().isNight)
         }
     }
 

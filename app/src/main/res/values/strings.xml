@@ -13,4 +13,6 @@
     <string name="screen_saver_title">Screen saver</string>
     <string name="screen_saver_description">Show the clock automatically while the phone is charging. In Settings, choose DockClock as the screen saver and set it to start while charging. It appears when the screen would normally turn off.</string>
     <string name="screen_saver_open_settings">Open screen saver settings</string>
+    <string name="settings_night_mode_title">Night mode</string>
+    <string name="settings_night_mode_description">Dims the clock and the screen from 22:00 to 07:00</string>
 </resources>

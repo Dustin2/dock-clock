@@ -33,8 +33,9 @@ fun SettingsSection(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     SettingsContent(
-        hideNotificationContent = uiState.hideNotificationContent,
+        settings = uiState,
         onHideNotificationContentChange = viewModel::onHideNotificationContentChange,
+        onNightModeChange = viewModel::onNightModeChange,
         onChooseApps = onChooseApps,
         modifier = modifier
     )
@@ -42,31 +43,26 @@ fun SettingsSection(
 
 @Composable
 fun SettingsContent(
-    hideNotificationContent: Boolean,
+    settings: UserSettings,
     onHideNotificationContentChange: (Boolean) -> Unit,
+    onNightModeChange: (Boolean) -> Unit,
     onChooseApps: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(modifier = modifier.fillMaxWidth()) {
-        // The whole row toggles, so the target is large and screen readers announce one switch.
-        Row(
-            modifier = Modifier
-                .toggleable(
-                    value = hideNotificationContent,
-                    role = Role.Switch,
-                    onValueChange = onHideNotificationContentChange
-                )
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            SettingText(
-                title = stringResource(R.string.settings_hide_content_title),
-                description = stringResource(R.string.settings_hide_content_description),
-                modifier = Modifier.weight(1f)
-            )
-            Switch(checked = hideNotificationContent, onCheckedChange = null)
-        }
+        SwitchRow(
+            title = stringResource(R.string.settings_hide_content_title),
+            description = stringResource(R.string.settings_hide_content_description),
+            checked = settings.hideNotificationContent,
+            onCheckedChange = onHideNotificationContentChange
+        )
+        HorizontalDivider()
+        SwitchRow(
+            title = stringResource(R.string.settings_night_mode_title),
+            description = stringResource(R.string.settings_night_mode_description),
+            checked = settings.nightMode,
+            onCheckedChange = onNightModeChange
+        )
         HorizontalDivider()
         SettingText(
             title = stringResource(R.string.choose_apps_title),
@@ -76,6 +72,26 @@ fun SettingsContent(
                 .clickable(role = Role.Button, onClick = onChooseApps)
                 .padding(16.dp)
         )
+    }
+}
+
+@Composable
+private fun SwitchRow(
+    title: String,
+    description: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    // The whole row toggles, so the target is large and screen readers announce one switch.
+    Row(
+        modifier = Modifier
+            .toggleable(value = checked, role = Role.Switch, onValueChange = onCheckedChange)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        SettingText(title = title, description = description, modifier = Modifier.weight(1f))
+        Switch(checked = checked, onCheckedChange = null)
     }
 }
 
@@ -96,8 +112,9 @@ private fun SettingText(title: String, description: String, modifier: Modifier =
 private fun SettingsContentPreview() {
     DockClockTheme {
         SettingsContent(
-            hideNotificationContent = true,
+            settings = UserSettings(hideNotificationContent = true),
             onHideNotificationContentChange = {},
+            onNightModeChange = {},
             onChooseApps = {}
         )
     }
