@@ -33,11 +33,18 @@ class PackageManagerAppInfoProvider @Inject constructor(
             val info = packageManager.getApplicationInfo(packageName, 0)
             AppInfo(
                 label = packageManager.getApplicationLabel(info).toString(),
-                icon = packageManager.getApplicationIcon(info).toBitmap().asImageBitmap()
+                icon = packageManager.getApplicationIcon(
+                    info
+                ).toBitmap(ICON_SIZE_PX, ICON_SIZE_PX).asImageBitmap()
             )
         } catch (_: PackageManager.NameNotFoundException) {
             // Uninstalled, or hidden from us by package visibility rules.
             AppInfo(label = packageName, icon = null)
         }
+    }
+
+    private companion object {
+        // Icons are drawn at about 40dp; a fixed small bitmap keeps a list of 100+ apps light on memory.
+        const val ICON_SIZE_PX = 128
     }
 }

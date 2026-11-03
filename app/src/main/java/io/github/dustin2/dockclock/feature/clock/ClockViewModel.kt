@@ -83,9 +83,9 @@ class ClockViewModel @Inject constructor(
             date = dateTime.format(
                 DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale)
             ),
-            notifications = notifications.map {
-                toUiModel(it, userSettings.hideNotificationContent)
-            }
+            notifications = notifications
+                .filter { it.packageName !in userSettings.hiddenApps }
+                .map { toUiModel(it, userSettings.hideNotificationContent) }
         )
     }
 
