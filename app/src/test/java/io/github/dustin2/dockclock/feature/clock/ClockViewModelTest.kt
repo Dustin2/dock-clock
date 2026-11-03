@@ -21,6 +21,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
 
@@ -60,7 +61,8 @@ class ClockViewModelTest {
     fun `initial state shows current time and date`() {
         val state = viewModel().uiState.value
 
-        assertEquals(ClockUiState(time = "14:05", date = "Tuesday, November 3, 2026"), state)
+        assertEquals("14:05", state.time)
+        assertEquals("Tuesday, November 3, 2026", state.date)
     }
 
     @Test
@@ -87,6 +89,16 @@ class ClockViewModelTest {
 
             advanceTimeByAndRun(1)
             assertEquals("14:06", awaitItem().time)
+        }
+    }
+
+    @Test
+    fun `moves the burn-in shift when the minute changes`() = runTest(dispatcher) {
+        viewModel().uiState.test {
+            val first = awaitItem().burnInShift
+
+            advanceTimeByAndRun(30_000)
+            assertNotEquals(first, awaitItem().burnInShift)
         }
     }
 
