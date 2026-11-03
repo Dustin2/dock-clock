@@ -22,6 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.github.dustin2.dockclock.core.designsystem.DockClockTheme
 import io.github.dustin2.dockclock.feature.clock.ClockActivity
 import io.github.dustin2.dockclock.feature.permissions.NotificationAccessSection
+import io.github.dustin2.dockclock.feature.settings.SettingsSection
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -49,6 +50,7 @@ private fun HomeScreen(onStartClock: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             NotificationAccessSection()
+            SettingsSection()
             Button(onClick = onStartClock) {
                 Text(stringResource(R.string.start_clock))
             }

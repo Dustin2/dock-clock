@@ -5,4 +5,6 @@
     <string name="notification_access_rationale">DockClock can show your recent notifications next to the clock. To do that, turn on notification access for DockClock in Settings. Notifications stay on this phone: they are never saved, logged, or sent anywhere.</string>
     <string name="notification_access_open_settings">Open settings</string>
     <string name="notification_access_granted">Notification access is on.</string>
+    <string name="settings_hide_content_title">Hide notification content</string>
+    <string name="settings_hide_content_description">Show only the app name and icon on the clock.</string>
 </resources>
