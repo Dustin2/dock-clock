@@ -1,0 +1,9 @@
+naming:
+  FunctionNaming:
+    # Composables are PascalCase by convention.
+    ignoreAnnotated: ['Composable']
+
+style:
+  UnusedPrivateMember:
+    # Previews are used by the IDE, not by code.
+    ignoreAnnotated: ['Preview']
