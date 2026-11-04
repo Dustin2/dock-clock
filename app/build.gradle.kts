@@ -20,6 +20,32 @@ android {
         versionName = "0.1.0"
     }
 
+    signingConfigs {
+        create("release") {
+            // Read from the environment (CI secrets), so the key never lives in the repository.
+            System.getenv("DOCKCLOCK_KEYSTORE_PATH")?.let {
+                storeFile = file(it)
+                storePassword = System.getenv("DOCKCLOCK_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("DOCKCLOCK_KEY_ALIAS")
+                keyPassword = System.getenv("DOCKCLOCK_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // R8 removes unused code and resources, shrinking the APK.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            // Without the release key (local builds), sign with the debug key so the
+            // minified build can still be installed and tested. CI checks the key is present.
+            val release = signingConfigs.getByName("release")
+            signingConfig =
+                if (release.storeFile != null) release else signingConfigs.getByName("debug")
+        }
+    }
+
     buildFeatures {
         compose = true
     }
