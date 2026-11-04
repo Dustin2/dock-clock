@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.dustin2.dockclock.core.designsystem.DockClockTheme
+import io.github.dustin2.dockclock.core.designsystem.ClockTheme
 
 @Composable
 fun ClockScreen(viewModel: ClockViewModel = hiltViewModel()) {
@@ -179,7 +179,7 @@ private val previewNotifications =
 @Preview(widthDp = 800, heightDp = 360)
 @Composable
 private fun ClockContentPreview() {
-    DockClockTheme {
+    ClockTheme {
         ClockContent(ClockUiState(time = "14:05", date = "Tuesday, November 3, 2026"))
     }
 }
@@ -187,7 +187,7 @@ private fun ClockContentPreview() {
 @Preview(widthDp = 800, heightDp = 360)
 @Composable
 private fun ClockContentWithNotificationsPreview() {
-    DockClockTheme {
+    ClockTheme {
         ClockContent(ClockUiState("14:05", "Tuesday, November 3, 2026", previewNotifications))
     }
 }
@@ -195,7 +195,7 @@ private fun ClockContentWithNotificationsPreview() {
 @Preview(widthDp = 800, heightDp = 360)
 @Composable
 private fun ClockContentNightPreview() {
-    DockClockTheme {
+    ClockTheme {
         ClockContent(
             ClockUiState("23:05", "Tuesday, November 3, 2026", previewNotifications, isNight = true)
         )
@@ -205,7 +205,7 @@ private fun ClockContentNightPreview() {
 @Preview(widthDp = 360, heightDp = 800)
 @Composable
 private fun ClockContentPortraitPreview() {
-    DockClockTheme {
+    ClockTheme {
         ClockContent(ClockUiState("14:05", "Tuesday, November 3, 2026", previewNotifications))
     }
 }
@@ -213,5 +213,5 @@ private fun ClockContentPortraitPreview() {
 @Preview(widthDp = 320)
 @Composable
 private fun NotificationItemPreview() {
-    DockClockTheme { NotificationItem(previewNotifications.first()) }
+    ClockTheme { NotificationItem(previewNotifications.first()) }
 }

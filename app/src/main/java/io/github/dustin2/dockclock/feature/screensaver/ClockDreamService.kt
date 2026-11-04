@@ -17,7 +17,8 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.dustin2.dockclock.core.designsystem.DockClockTheme
+import io.github.dustin2.dockclock.R
+import io.github.dustin2.dockclock.core.designsystem.ClockTheme
 import io.github.dustin2.dockclock.feature.clock.ClockScreen
 import io.github.dustin2.dockclock.feature.clock.ClockViewModel
 import io.github.dustin2.dockclock.feature.clock.DeviceTimeSettings
@@ -59,6 +60,8 @@ class ClockDreamService :
 
     override fun onCreate() {
         super.onCreate()
+        // Services have no manifest theme; set it before the dream window is created.
+        setTheme(R.style.Theme_DockClock_Clock)
         savedStateRegistryController.performRestore(null)
         lifecycleRegistry.currentState = Lifecycle.State.CREATED
     }
@@ -72,7 +75,7 @@ class ClockDreamService :
         val viewModel = createClockViewModel()
         setContentView(
             ComposeView(this).apply {
-                setContent { DockClockTheme { ClockScreen(viewModel) } }
+                setContent { ClockTheme { ClockScreen(viewModel) } }
             }
         )
         // Compose looks these up from the window's root view.

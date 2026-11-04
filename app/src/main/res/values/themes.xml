@@ -1,4 +1,10 @@
 <resources>
-    <!-- Window theme only; all in-app styling comes from the Compose theme. -->
-    <style name="Theme.DockClock" parent="android:Theme.Material.NoActionBar" />
+    <!-- Window theme only; all in-app styling comes from the Compose theme.
+         Light here and dark in values-night, so the window matches the system mode on launch. -->
+    <style name="Theme.DockClock" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- The clock is always black, whatever the system mode. -->
+    <style name="Theme.DockClock.Clock" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
 </resources>

@@ -29,6 +29,7 @@
         </activity>
         <activity
             android:name=".feature.clock.ClockActivity"
+            android:theme="@style/Theme.DockClock.Clock"
             android:exported="false"
             android:screenOrientation="sensorLandscape" />
         <service
