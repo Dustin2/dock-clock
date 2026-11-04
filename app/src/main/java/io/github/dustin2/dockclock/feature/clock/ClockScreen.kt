@@ -3,12 +3,14 @@ package io.github.dustin2.dockclock.feature.clock
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -23,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,35 +33,49 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.dustin2.dockclock.core.designsystem.DockClockTheme
+import io.github.dustin2.dockclock.core.designsystem.ClockTheme
 
 @Composable
 fun ClockScreen(viewModel: ClockViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    NightBrightnessEffect(uiState.isNight)
     ClockContent(uiState)
 }
 
 @Composable
 fun ClockContent(uiState: ClockUiState, modifier: Modifier = Modifier) {
-    Row(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .safeDrawingPadding(),
-        verticalAlignment = Alignment.CenterVertically
+            .safeDrawingPadding()
+            // Applied after the background so only the content moves, never the black fill.
+            .offset(x = uiState.burnInShift.xDp.dp, y = uiState.burnInShift.yDp.dp)
+            .alpha(if (uiState.isNight) NIGHT_CONTENT_ALPHA else 1f)
     ) {
-        ClockFace(
-            time = uiState.time,
-            date = uiState.date,
-            modifier = Modifier.weight(CLOCK_WEIGHT)
-        )
-        if (uiState.notifications.isNotEmpty()) {
-            NotificationList(
-                notifications = uiState.notifications,
-                modifier = Modifier
-                    .weight(NOTIFICATIONS_WEIGHT)
-                    .fillMaxHeight()
-            )
+        // The screen saver cannot lock orientation, so portrait stacks instead of side by side.
+        if (maxWidth > maxHeight) {
+            Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
+                ClockFace(uiState.time, uiState.date, Modifier.weight(CLOCK_WEIGHT))
+                if (uiState.notifications.isNotEmpty()) {
+                    NotificationList(
+                        notifications = uiState.notifications,
+                        modifier = Modifier
+                            .weight(NOTIFICATIONS_WEIGHT)
+                            .fillMaxHeight()
+                    )
+                }
+            }
+        } else {
+            Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
+                ClockFace(uiState.time, uiState.date, Modifier.fillMaxWidth())
+                if (uiState.notifications.isNotEmpty()) {
+                    NotificationList(
+                        notifications = uiState.notifications,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
     }
 }
@@ -151,6 +168,7 @@ private val MAX_TIME_FONT_SIZE = 240.sp
 private const val TIME_WIDTH_FRACTION = 0.85f
 private const val CLOCK_WEIGHT = 3f
 private const val NOTIFICATIONS_WEIGHT = 2f
+private const val NIGHT_CONTENT_ALPHA = 0.4f
 
 private val previewNotifications =
     listOf(
@@ -161,7 +179,7 @@ private val previewNotifications =
 @Preview(widthDp = 800, heightDp = 360)
 @Composable
 private fun ClockContentPreview() {
-    DockClockTheme {
+    ClockTheme {
         ClockContent(ClockUiState(time = "14:05", date = "Tuesday, November 3, 2026"))
     }
 }
@@ -169,7 +187,25 @@ private fun ClockContentPreview() {
 @Preview(widthDp = 800, heightDp = 360)
 @Composable
 private fun ClockContentWithNotificationsPreview() {
-    DockClockTheme {
+    ClockTheme {
+        ClockContent(ClockUiState("14:05", "Tuesday, November 3, 2026", previewNotifications))
+    }
+}
+
+@Preview(widthDp = 800, heightDp = 360)
+@Composable
+private fun ClockContentNightPreview() {
+    ClockTheme {
+        ClockContent(
+            ClockUiState("23:05", "Tuesday, November 3, 2026", previewNotifications, isNight = true)
+        )
+    }
+}
+
+@Preview(widthDp = 360, heightDp = 800)
+@Composable
+private fun ClockContentPortraitPreview() {
+    ClockTheme {
         ClockContent(ClockUiState("14:05", "Tuesday, November 3, 2026", previewNotifications))
     }
 }
@@ -177,5 +213,5 @@ private fun ClockContentWithNotificationsPreview() {
 @Preview(widthDp = 320)
 @Composable
 private fun NotificationItemPreview() {
-    DockClockTheme { NotificationItem(previewNotifications.first()) }
+    ClockTheme { NotificationItem(previewNotifications.first()) }
 }

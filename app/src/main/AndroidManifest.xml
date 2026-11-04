@@ -29,6 +29,7 @@
         </activity>
         <activity
             android:name=".feature.clock.ClockActivity"
+            android:theme="@style/Theme.DockClock.Clock"
             android:exported="false"
             android:screenOrientation="sensorLandscape" />
         <service
@@ -38,6 +39,17 @@
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+        <!-- Exported so the system can bind it; the permission limits that to the system. -->
+        <service
+            android:name=".feature.screensaver.ClockDreamService"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_DREAM_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
     </application>

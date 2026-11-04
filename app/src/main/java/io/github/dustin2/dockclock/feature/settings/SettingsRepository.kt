@@ -15,7 +15,8 @@ import kotlinx.coroutines.flow.map
 data class UserSettings(
     val hideNotificationContent: Boolean = false,
     /** Hidden rather than allowed apps, so apps installed later show up without extra setup. */
-    val hiddenApps: Set<String> = emptySet()
+    val hiddenApps: Set<String> = emptySet(),
+    val nightMode: Boolean = true
 )
 
 interface SettingsRepository {
@@ -24,6 +25,8 @@ interface SettingsRepository {
     suspend fun setHideNotificationContent(hide: Boolean)
 
     suspend fun setAppHidden(packageName: String, hidden: Boolean)
+
+    suspend fun setNightMode(enabled: Boolean)
 }
 
 class DataStoreSettingsRepository @Inject constructor(
@@ -36,7 +39,8 @@ class DataStoreSettingsRepository @Inject constructor(
             .map {
                 UserSettings(
                     hideNotificationContent = it[HIDE_NOTIFICATION_CONTENT] ?: false,
-                    hiddenApps = it[HIDDEN_APPS].orEmpty()
+                    hiddenApps = it[HIDDEN_APPS].orEmpty(),
+                    nightMode = it[NIGHT_MODE] ?: true
                 )
             }
 
@@ -51,8 +55,13 @@ class DataStoreSettingsRepository @Inject constructor(
         }
     }
 
+    override suspend fun setNightMode(enabled: Boolean) {
+        dataStore.edit { it[NIGHT_MODE] = enabled }
+    }
+
     private companion object {
         val HIDE_NOTIFICATION_CONTENT = booleanPreferencesKey("hide_notification_content")
         val HIDDEN_APPS = stringSetPreferencesKey("hidden_apps")
+        val NIGHT_MODE = booleanPreferencesKey("night_mode")
     }
 }

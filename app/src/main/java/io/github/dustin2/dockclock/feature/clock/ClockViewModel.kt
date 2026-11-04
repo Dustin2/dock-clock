@@ -25,7 +25,9 @@ import kotlinx.coroutines.flow.stateIn
 data class ClockUiState(
     val time: String,
     val date: String,
-    val notifications: List<NotificationUiModel> = emptyList()
+    val notifications: List<NotificationUiModel> = emptyList(),
+    val burnInShift: BurnInShift = BurnInShift(0, 0),
+    val isNight: Boolean = false
 )
 
 data class NotificationUiModel(
@@ -85,7 +87,9 @@ class ClockViewModel @Inject constructor(
             ),
             notifications = notifications
                 .filter { it.packageName !in userSettings.hiddenApps }
-                .map { toUiModel(it, userSettings.hideNotificationContent) }
+                .map { toUiModel(it, userSettings.hideNotificationContent) },
+            burnInShift = burnInShift(minute = instant.epochSecond / SECONDS_PER_MINUTE),
+            isNight = userSettings.nightMode && isNightTime(dateTime.toLocalTime())
         )
     }
 
@@ -105,6 +109,7 @@ class ClockViewModel @Inject constructor(
 
     private companion object {
         const val MILLIS_PER_MINUTE = 60_000L
+        const val SECONDS_PER_MINUTE = 60L
         const val STOP_TIMEOUT_MILLIS = 5_000L
     }
 }

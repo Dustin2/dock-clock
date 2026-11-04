@@ -24,4 +24,8 @@ class FakeSettingsRepository(initial: UserSettings = UserSettings()) : SettingsR
                 }
             )
     }
+
+    override suspend fun setNightMode(enabled: Boolean) {
+        state.value = state.value.copy(nightMode = enabled)
+    }
 }
