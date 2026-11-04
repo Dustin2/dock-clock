@@ -9,7 +9,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.dustin2.dockclock.core.designsystem.DockClockTheme
+import io.github.dustin2.dockclock.core.designsystem.ClockTheme
 
 /**
  * Separate activity because orientation, keep-screen-on and immersive mode are window settings:
@@ -26,7 +26,7 @@ class ClockActivity : ComponentActivity() {
             hide(WindowInsetsCompat.Type.systemBars())
         }
         setContent {
-            DockClockTheme {
+            ClockTheme {
                 ClockScreen()
             }
         }
